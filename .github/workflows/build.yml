@@ -1,27 +1,40 @@
-name: Build C Project
+name: Build and Release C Project
 
 on:
   push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+    branches: [ main ]  # triggers on pushes to main
+  workflow_dispatch:    # allows manual trigger
 
 jobs:
-  build:
+  build-and-release:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout Repo
         uses: actions/checkout@v3
 
       - name: Install GCC
-        run: sudo apt-get install build-essential -y
+        run: sudo apt-get update && sudo apt-get install build-essential -y
 
       - name: Compile C Program
-        run: gcc main.c -o my_program
+        run: |
+          gcc *.c -o my_program
+          ls -la  # optional: check files
 
-      - name: Upload Executable
-        uses: actions/upload-artifact@v3
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
         with:
-          name: my_program
-          path: my_program
+          tag_name: v${{ github.run_number }}
+          name: Release ${{ github.run_number }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Executable to Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: my_program
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
