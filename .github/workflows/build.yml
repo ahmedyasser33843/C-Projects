@@ -1,0 +1,27 @@
+name: Build C Project
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Install GCC
+        run: sudo apt-get install build-essential -y
+
+      - name: Compile C Program
+        run: gcc main.c -o my_program
+
+      - name: Upload Executable
+        uses: actions/upload-artifact@v3
+        with:
+          name: my_program
+          path: my_program
