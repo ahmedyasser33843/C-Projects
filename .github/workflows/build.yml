@@ -1,10 +1,20 @@
 name: Build and Release C Programs
 
+permissions:
+  contents: write   # allow pushing artifacts
+  packages: write
+  id-token: write
+  actions: read
+  pull-requests: write
+  issues: write
+  checks: write
+  releases: write   # <--- allow creating releases
+
 on:
   push:
-    branches: [ main ]        # run on pushes to main
-  workflow_dispatch:          # allows manual trigger
-
+    branches: [ main ]
+  workflow_dispatch:
+  
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
