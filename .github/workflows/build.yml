@@ -1,13 +1,12 @@
 name: Build and Release C Programs
 
-# Top-level permissions for the workflow
 permissions:
-  contents: write   # allows pushing artifacts & creating releases
+  contents: write   # needed for checkout, releases, artifacts
 
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:  # allow manual trigger
+  workflow_dispatch:
 
 jobs:
   build-and-release:
@@ -24,14 +23,21 @@ jobs:
         run: |
           gcc simple_calc.c -o simple_calc -lm
           gcc task_to_do.c -o task_to_do
-          ls -la   # optional: check files
+          ls -la
+
+      - name: Create Tag
+        id: tag
+        run: |
+          TAG="v$(date +'%Y%m%d%H%M%S')"  # unique timestamp tag
+          echo "TAG=$TAG" >> $GITHUB_ENV
+          git tag $TAG
+          git push origin $TAG
 
       - name: Create Release
-        id: create_release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: v${{ github.run_number }}
-          name: Release ${{ github.run_number }}
+          tag_name: ${{ env.TAG }}
+          name: Release ${{ env.TAG }}
           draft: false
           prerelease: false
         env:
@@ -41,5 +47,6 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: simple_calc task_to_do
+          tag_name: ${{ env.TAG }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
